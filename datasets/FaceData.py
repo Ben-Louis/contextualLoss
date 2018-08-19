@@ -9,9 +9,6 @@ import itertools
 from .utils import *
 import sys
 sys.path.append(os.path.abspath(__file__).rsplit(os.sep, 3)[0])
-#print(sys.path)
-from preprocessing import faceswapper
-
 
 
 class FaceData(Dataset):
@@ -48,7 +45,7 @@ class FaceData(Dataset):
 
         return self.transform(image), self.transform(self.ref_pho) # label: ont-hot
 
-    def get_test(self, index, n):
+    def get_test(self, n):
         files = random.sample(self.test_files, n)
         test_phos = []
         for f in files:

@@ -25,6 +25,12 @@ def get_parameter():
     parser.add_argument('--conv_dim', type=int, default=64)
     parser.add_argument('--gen_v', type=int, default=-1)
     parser.add_argument('--ext', type=str, default='vgg19')
+    parser.add_argument('--h', type=float, default=0.5)
+    parser.add_argument('--distance', type=str, default='cos')
+    parser.add_argument('--content_layers', type=str, default='conv_4_2')
+    parser.add_argument('--style_layers', type=str, default='conv_3_2,conv_4_2')
+    parser.add_argument('--single_ref', type=str2bool, default=True)
+
 
     # train
     parser.add_argument('--num_steps', type=int, default=200000)
@@ -32,7 +38,7 @@ def get_parameter():
     parser.add_argument('--d_train_repeat', type=int, default=5)
     parser.add_argument('--lr', type=float, default=0.0001)
     parser.add_argument('--beta', type=float, default=0.5)
-    parser.add_argument('--batch_size', type=int, default=8)
+    parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--pretrained_model', type=int, default=-1)
 
     parser.add_argument('--lambda_content', type=float, default=1)
@@ -54,6 +60,8 @@ def get_parameter():
     # device
     config.device = torch.device('cuda:0')
     #config.select_attrs = config.select_attrs.split(',')
+    config.content_layers = config.content_layers.split(',')
+    config.style_layers = config.style_layers.split(',')
 
     # log
     try:
@@ -73,7 +81,6 @@ def main():
     ##### build model #####
     model = {}
     model['G'] = Generator[config.gen_v](config.conv_dim, config.image_size)
-    model['ext'] = Extractor()
 
     ##### create dataset #####
     data = FaceData(config.data_root, config.image_size)

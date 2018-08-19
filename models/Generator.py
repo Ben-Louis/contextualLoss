@@ -44,39 +44,36 @@ class Generator_v1(Module):
         self.conv_layers.append(self.conv5)
         curr_dim = curr_dim 
 
-        if image_size == 128:
-            self.conv6 = Sequential(
-                ConvBlock(curr_dim+6, curr_dim, norm='in', act='relu', kernel_size=4, stride=2, padding=1),
-                ResBlock(curr_dim),
-                ConvBlock(curr_dim, curr_dim, norm='in', act='relu', kernel_size=3, stride=1, padding=1))            
-            self.conv_layers.append(self.conv6)
-            curr_dim = curr_dim
+        self.conv6 = Sequential(
+            ConvBlock(curr_dim+6, curr_dim, norm='in', act='relu', kernel_size=4, stride=2, padding=1),
+            ResBlock(curr_dim),
+            ConvBlock(curr_dim, curr_dim, norm='in', act='relu', kernel_size=3, stride=1, padding=1))
+        self.conv_layers.append(self.conv6)
+        curr_dim = curr_dim
 
         # image_size = 4, curr_dim = conv_dim * 4
         self.bottle_neck = Sequential(
-            ConvBlock(curr_dim, curr_dim, kernel_size=4, stride=1, padding=0, bias=False),
-            nn.PixelShuffle(4))
-        curr_dim = curr_dim // 16
+            ResBlock(curr_dim),
+            ResBlock(curr_dim),
+            ResBlock(curr_dim))
+        curr_dim = curr_dim
 
-        factor = 8
         self.deconv_layers = []
-        if image_size == 128:
-            self.deconv6 = Sequential(
-                ConvBlock(curr_dim+conv_dim*4, curr_dim*4, norm='in', act='relu', transpose=True, kernel_size=4, stride=2, padding=1),
-                Self_Attn(curr_dim*4),
-                ResBlock(curr_dim*4),
-                ConvBlock(curr_dim*4, curr_dim*4, norm='in', act='relu', kernel_size=3, stride=1, padding=1))            
-            self.deconv_layers.append(self.deconv6)
-            curr_dim = curr_dim * 4
-            factor = factor // 4
+        self.deconv6 = Sequential(
+            ConvBlock(curr_dim+conv_dim*4, curr_dim, norm='in', act='relu', transpose=True, kernel_size=4, stride=2, padding=1),
+            Self_Attn(curr_dim),
+            ResBlock(curr_dim),
+            ConvBlock(curr_dim, curr_dim, norm='in', act='relu', kernel_size=3, stride=1, padding=1))
+        self.deconv_layers.append(self.deconv6)
+        curr_dim = curr_dim
 
         self.deconv5 = Sequential(
-            ConvBlock(curr_dim+conv_dim*4, curr_dim*factor, norm='in', act='relu', transpose=True, kernel_size=4, stride=2, padding=1),
-            Self_Attn(curr_dim*factor),
-            ResBlock(curr_dim*factor),
-            ConvBlock(curr_dim*factor, curr_dim*factor, norm='in', act='relu', kernel_size=3, stride=1, padding=1))            
+            ConvBlock(curr_dim+conv_dim*4, curr_dim, norm='in', act='relu', transpose=True, kernel_size=4, stride=2, padding=1),
+            Self_Attn(curr_dim),
+            ResBlock(curr_dim),
+            ConvBlock(curr_dim, curr_dim, norm='in', act='relu', kernel_size=3, stride=1, padding=1))
         self.deconv_layers.append(self.deconv5)
-        curr_dim = curr_dim*factor
+        curr_dim = curr_dim
 
         self.deconv4 = Sequential(
             ConvBlock(curr_dim+conv_dim*4, curr_dim*2, norm='in', act='relu', transpose=True, kernel_size=4, stride=2, padding=1),
@@ -136,7 +133,7 @@ class Generator_v1(Module):
 
 class Generator_v2(Module):
     def __init__(self, conv_dim, image_size):
-        super(Generator_v1, self).__init__()
+        super(Generator_v2, self).__init__()
 
         self.conv_layers = []
 
@@ -175,39 +172,36 @@ class Generator_v2(Module):
         self.conv_layers.append(self.conv5)
         curr_dim = curr_dim 
 
-        if image_size == 128:
-            self.conv6 = Sequential(
-                ConvBlock(curr_dim+6, curr_dim, norm='in', act='relu', kernel_size=4, stride=2, padding=1),
-                ResBlock(curr_dim),
-                ConvBlock(curr_dim, curr_dim, norm='in', act='relu', kernel_size=3, stride=1, padding=1))            
-            self.conv_layers.append(self.conv6)
-            curr_dim = curr_dim
+        self.conv6 = Sequential(
+            ConvBlock(curr_dim+6, curr_dim, norm='in', act='relu', kernel_size=4, stride=2, padding=1),
+            ResBlock(curr_dim),
+            ConvBlock(curr_dim, curr_dim, norm='in', act='relu', kernel_size=3, stride=1, padding=1))
+        self.conv_layers.append(self.conv6)
+        curr_dim = curr_dim
 
         # image_size = 4, curr_dim = conv_dim * 4
         self.bottle_neck = Sequential(
-            ConvBlock(curr_dim, curr_dim, kernel_size=4, stride=1, padding=0, bias=False),
-            nn.PixelShuffle(4))
-        curr_dim = curr_dim // 16
+            ResBlock(curr_dim),
+            ResBlock(curr_dim),
+            ResBlock(curr_dim))
+        curr_dim = curr_dim
 
-        factor = 8
         self.deconv_layers = []
-        if image_size == 128:
-            self.deconv6 = Sequential(
-                ConvBlock(curr_dim+conv_dim*4, curr_dim*4, norm='in', act='relu', transpose=True, kernel_size=4, stride=2, padding=1),
-                Self_Attn(curr_dim*4),
-                ResBlock(curr_dim*4),
-                ConvBlock(curr_dim*4, curr_dim*4, norm='in', act='relu', kernel_size=3, stride=1, padding=1))            
-            self.deconv_layers.append(self.deconv6)
-            curr_dim = curr_dim * 4
-            factor = factor // 4
+        self.deconv6 = Sequential(
+            ConvBlock(curr_dim+conv_dim*4, curr_dim, norm='in', act='relu', transpose=True, kernel_size=4, stride=2, padding=1),
+            Self_Attn(curr_dim),
+            ResBlock(curr_dim),
+            ConvBlock(curr_dim, curr_dim, norm='in', act='relu', kernel_size=3, stride=1, padding=1))
+        self.deconv_layers.append(self.deconv6)
+        curr_dim = curr_dim
 
         self.deconv5 = Sequential(
-            ConvBlock(curr_dim+conv_dim*4, curr_dim*factor, norm='in', act='relu', transpose=True, kernel_size=4, stride=2, padding=1),
-            Self_Attn(curr_dim*factor),
-            ResBlock(curr_dim*factor),
-            ConvBlock(curr_dim*factor, curr_dim*factor, norm='in', act='relu', kernel_size=3, stride=1, padding=1))            
+            ConvBlock(curr_dim+conv_dim*4, curr_dim, norm='in', act='relu', transpose=True, kernel_size=4, stride=2, padding=1),
+            Self_Attn(curr_dim),
+            ResBlock(curr_dim),
+            ConvBlock(curr_dim, curr_dim, norm='in', act='relu', kernel_size=3, stride=1, padding=1))
         self.deconv_layers.append(self.deconv5)
-        curr_dim = curr_dim*factor
+        curr_dim = curr_dim
 
         self.deconv4 = Sequential(
             ConvBlock(curr_dim+conv_dim*4, curr_dim*2, norm='in', act='relu', transpose=True, kernel_size=4, stride=2, padding=1),

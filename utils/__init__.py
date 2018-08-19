@@ -1,2 +1,2 @@
-from .utils import *
-from extractor import DeepFeature
+from .util import *
+from .extractor import DeepFeature

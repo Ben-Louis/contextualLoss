@@ -14,6 +14,7 @@ def train(model, data, config):
         load_model(model, config)
         print('loading models successfully!\n')
     ext_net = DeepFeature(config.ext)
+    ext_net.to(config.device)
     contextual_loss = get_contextual_loss(config)
 
     # optimizor
@@ -22,7 +23,6 @@ def train(model, data, config):
         opts[key] = torch.optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=config.lr, betas=(config.beta, 0.999))
 
     # data_loader
-    data.set_mode('train')
     data_loader = data.get_loader(batch_size=config.batch_size, num_workers=max(config.batch_size,1), shuffle=True, drop_last=True)
     data_iter = iter(data_loader)
 
@@ -37,7 +37,7 @@ def train(model, data, config):
     for i in range(config.num_steps):
         log['step'] = i+1
 
-        src_pho, ref_pho, data_iter = get_data(data_iter, data_loader)
+        (src_pho, ref_pho), data_iter = get_data(data_iter, data_loader)
         src_pho, ref_pho = src_pho.to(config.device), ref_pho.to(config.device)
 
         ####################### train Discriminator and Comparator #######################
@@ -55,9 +55,9 @@ def train(model, data, config):
 
         loss = config.lambda_content * closs + config.lambda_style * sloss
 
-        opt['G'].zero_grad()
+        opts['G'].zero_grad()
         loss.backward()
-        model['G'].step()
+        opts['G'].step()
 
 
         ### save log ###

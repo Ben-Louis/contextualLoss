@@ -1,2 +1,2 @@
-from .CelebAData import CelebAData_exchange
+#from .CelebAData import CelebAData_exchange
 from .FaceData import FaceData

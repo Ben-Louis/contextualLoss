@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torchvision
-from .utils import Normalization, FeatureExtractor
 
 default_mean = [0.485, 0.456, 0.406]
 default_std = [0.229, 0.224, 0.225]
@@ -44,7 +43,7 @@ class FeatureExtractor(torch.nn.Sequential):
 def merge_list(lst):
     res = []
     for l in lst:
-        res.extent(l)
+        res.extend(l)
     return res
 
 class DeepFeature(nn.Module):
