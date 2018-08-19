@@ -45,10 +45,10 @@ def train(model, data, config):
         fake_pho = model['G'](src_pho, ref_pho)
 
         # compute loss
-        src_feat = ext_net(denorm(src_pho), config.content_layers, detach=True)
+        src_feat = [f.to(config.device2) for f in ext_net(denorm(src_pho), config.content_layers, detach=True)]
         if (not config.single_ref) or (not ref_feat):
-            ref_feat = ext_net(denorm(ref_pho), config.style_layers, detach=True)
-        fake_feat = ext_net(denorm(fake_pho), [config.content_layers,config.style_layers], detach=False)
+            ref_feat = [f.to(config.device2) for f in ext_net(denorm(ref_pho), config.style_layers, detach=True)]
+        fake_feat = [[f.to(config.device2) for f in lst] for lst in ext_net(denorm(fake_pho), [config.content_layers,config.style_layers], detach=False)]
 
         closs = sum([contextual_loss(fake_feat[0][i], src_feat[i]) for i in range(len(src_feat))])
         torch.cuda.empty_cache()

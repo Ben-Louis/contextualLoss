@@ -40,6 +40,7 @@ def get_parameter():
     parser.add_argument('--beta', type=float, default=0.5)
     parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--pretrained_model', type=int, default=-1)
+    parser.add_argument('--gpu_num', type=int, default=2)
 
     parser.add_argument('--lambda_content', type=float, default=1)
     parser.add_argument('--lambda_style', type=float, default=1)
@@ -59,6 +60,7 @@ def get_parameter():
 
     # device
     config.device = torch.device('cuda:0')
+    config.device2 = torch.device('cuda:%d'%config.gpu_num)
     #config.select_attrs = config.select_attrs.split(',')
     config.content_layers = config.content_layers.split(',')
     config.style_layers = config.style_layers.split(',')
