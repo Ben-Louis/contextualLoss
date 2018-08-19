@@ -76,7 +76,7 @@ def train(model, data, config):
             src_pho = src_pho.to(config.device)
 
             imgs = [src_pho.cpu()]
-            ref_pho_test = ref_pho.repeat(src_pho.size(0),1,1,1)
+            ref_pho_test = ref_pho.repeat(src_pho.size(0)//ref_pho.size(0),1,1,1)
 
             with torch.no_grad():
                 fake_imgs = model['G'](src_pho, ref_pho_test).cpu()
@@ -123,7 +123,7 @@ def get_contextual_loss(config):
         elif config.distance == 'cos':
             dist = 1 - F.cosine_similarity(feat1, feat2, dim=1)
 
-        dist = dist / (dist.min(dim=2)[0]+1e-5)
+        dist = dist / (dist.min(dim=2,keepdim=True)[0]+1e-5)
         dist = torch.exp((1-dist)/config.h)
         cx = dist.max(dim=1)[0]
         return -torch.log(cx.mean(dim=1)).mean()
