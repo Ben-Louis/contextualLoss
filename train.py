@@ -51,7 +51,9 @@ def train(model, data, config):
         fake_feat = ext_net(denorm(fake_pho), [config.content_layers,config.style_layers], detach=False)
 
         closs = sum([contextual_loss(fake_feat[0][i], src_feat[i]) for i in range(len(src_feat))])
+        torch.cuda.empty_cache()
         sloss = sum([contextual_loss(fake_feat[1][i], ref_feat[i]) for i in range(len(ref_feat))])
+        torch.cuda.empty_cache()
 
         loss = config.lambda_content * closs + config.lambda_style * sloss
 
