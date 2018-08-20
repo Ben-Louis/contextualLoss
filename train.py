@@ -116,15 +116,15 @@ def get_contextual_loss(config):
         if H < H2 or W < W2:
             feat2 = random_crop(feat2, (2,3), (H,W))        
 
-        dists = []
-        H, W = min(sep,H), min(sep,W)
+
+        cx = torch.zeros(feat1.size(0), 1, H*W).to(feat1.device)
+        H, W = min(sep, H), min(sep, W)
         feat1 = merge_list([f.split(sep, dim=3) for f in feat1.split(sep, dim=2)])
         feat2 = merge_list([f.split(sep, dim=3) for f in feat2.split(sep, dim=2)])
         for f1 in feat1:
             f1 = f1.contiguous().view(B, C, H*W, 1).repeat(1,1,1,H*W)
-            dists.append([])
+            dists = []
             for f2 in feat2:
-                print(f1.shape, f2.shape)
                 f2 = f2.contiguous().view(B, C, H*W, 1).repeat(1,1,1,H*W).detach()
 
                 if config.distance == 'l2':
@@ -133,13 +133,13 @@ def get_contextual_loss(config):
                     dist = (f1 - f2).abs().sum(dim=1)
                 elif config.distance == 'cos':
                     dist = 1 - F.cosine_similarity(f1, f2, dim=1)
-                dists[-1].append(dist)
+                dists.append(dist)
 
-        dist = torch.cat(list(map(lambda x: torch.cat(x, dim=2), dists)), dim=1)
-        dist = dist / (dist.min(dim=2,keepdim=True)[0]+1e-5)
-        dist = torch.exp((1-dist)/config.h)
-        cx = dist.max(dim=1)[0]
-        return -torch.log(cx.mean(dim=1)).mean()
+            dist = torch.cat(dists, dim=2)
+            dist = dist / (dist.min(dim=2,keepdim=True)[0]+1e-5)
+            dist = torch.exp((1-dist)/config.h)
+            cx = torch.max(torch.cat([cx, dist], dim=1), dim=1, keepdim=True)[0]
+        return -torch.log(cx.squeeze(1).mean(dim=1)).mean()
     return contextual_loss
 
 
