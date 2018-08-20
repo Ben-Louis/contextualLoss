@@ -114,7 +114,9 @@ class DeepFeature(nn.Module):
             target_layers.sort()
             distribute_layers = []
             for e in layers:
-                distribute_layers.append([target_layers.index(i) for i in e])
+                t = [target_layers.index(i) for i in e]
+                t.sort()
+                distribute_layers.append(t)
             if isinstance(target_layers[0], str):
                 target_layers = [self.layer2num[s] for s in target_layers]
 
