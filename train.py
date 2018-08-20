@@ -65,8 +65,9 @@ def train(model, data, config):
 
         closs = [contextual_loss(fake_feat[0][i], src_feat[i]) for i in range(len(src_feat))]
         sloss = [contextual_loss(fake_feat[1][i], ref_feat[i]) for i in range(len(ref_feat))]
+        closs, sloss = sum(closs), sum(sloss)
 
-        loss = config.lambda_content * sum(closs) + config.lambda_style * sum(sloss)
+        loss = config.lambda_content * closs + config.lambda_style * sloss
 
         opts['G'].zero_grad()
         loss.backward()
