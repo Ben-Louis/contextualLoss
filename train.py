@@ -45,10 +45,10 @@ def train(model, data, config):
         fake_pho = model['G'](src_pho, ref_pho)
 
         # compute loss
-        src_feat = [f.to(config.device2) for f in ext_net(denorm(src_pho), config.content_layers, detach=True)]
+        src_feat = ext_net(denorm(src_pho), config.content_layers, detach=True)
         if (not config.single_ref) or (not ref_feat):
-            ref_feat = [f.to(config.device2) for f in ext_net(denorm(ref_pho), config.style_layers, detach=True)]
-        fake_feat = [[f.to(config.device2) for f in lst] for lst in ext_net(denorm(fake_pho), [config.content_layers,config.style_layers], detach=False)]
+            ref_feat = ext_net(denorm(ref_pho), config.style_layers, detach=True)
+        fake_feat = ext_net(denorm(fake_pho), [config.content_layers,config.style_layers], detach=False)
 
         closs = sum([contextual_loss(fake_feat[0][i], src_feat[i]) for i in range(len(src_feat))])
         torch.cuda.empty_cache()
@@ -115,16 +115,26 @@ def get_contextual_loss(config):
         if H < H2 or W < W2:
             feat2 = random_crop(feat2, (2,3), (H,W))        
 
-        feat1 = feat1.view(B, C, H*W, 1).repeat(1,1,1,H*W)
-        feat2 = feat2.view(B, C, H*W, 1).repeat(1,1,1,H*W)
+        dists = []
+        H, W = min(32,H), min(32,W)
+        feat1 = merge_list([f.split(32, dim=3) for f in feat1.split(32, dim=2)])
+        feat2 = merge_list([f.split(32, dim=3) for f in feat2.split(32, dim=2)])
+        for f1 in feat1:
+            dists.append([])
+            for f2 in feat2:
 
-        if config.distance == 'l2':
-            dist = (feat1 - feat2).pow(2).sum(dim=1)
-        elif config.distance == 'l1':
-            dist = (feat1 - feat2).abs().sum(dim=1)
-        elif config.distance == 'cos':
-            dist = 1 - F.cosine_similarity(feat1, feat2, dim=1)
+                f1 = f1.view(B, C, H*W, 1).repeat(1,1,1,H*W)
+                f2 = f2.view(B, C, H*W, 1).repeat(1,1,1,H*W)
 
+                if config.distance == 'l2':
+                    dist = (f1 - f2).pow(2).sum(dim=1)
+                elif config.distance == 'l1':
+                    dist = (f1 - f2).abs().sum(dim=1)
+                elif config.distance == 'cos':
+                    dist = 1 - F.cosine_similarity(f1, f2, dim=1)
+                dists[-1].append(dist)
+
+        dist = torch.cat(list(map(lambda x: torch.cat(x, dim=2), dists)), dim=1)
         dist = dist / (dist.min(dim=2,keepdim=True)[0]+1e-5)
         dist = torch.exp((1-dist)/config.h)
         cx = dist.max(dim=1)[0]

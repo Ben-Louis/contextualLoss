@@ -68,3 +68,9 @@ def get_data(data_iter, data_loader):
         phos = next(data_iter)
 
     return phos, data_iter
+
+def merge_list(lst):
+    res = []
+    for l in lst:
+        res.extend(l)
+    return res
