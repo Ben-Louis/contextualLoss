@@ -123,8 +123,8 @@ def get_contextual_loss(config):
             dists.append([])
             for f2 in feat2:
 
-                f1 = f1.view(B, C, H*W, 1).repeat(1,1,1,H*W)
-                f2 = f2.view(B, C, H*W, 1).repeat(1,1,1,H*W)
+                f1 = f1.contiguous().view(B, C, H*W, 1).repeat(1,1,1,H*W)
+                f2 = f2.contiguous().view(B, C, H*W, 1).repeat(1,1,1,H*W)
 
                 if config.distance == 'l2':
                     dist = (f1 - f2).pow(2).sum(dim=1)
