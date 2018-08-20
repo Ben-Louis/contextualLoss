@@ -63,12 +63,10 @@ def train(model, data, config):
             ref_feat = ext_net(denorm(ref_pho), config.style_layers, detach=True)
         fake_feat = ext_net(denorm(fake_pho), [config.content_layers,config.style_layers], detach=False)
 
-        closs = sum([contextual_loss(fake_feat[0][i], src_feat[i]) for i in range(len(src_feat))])
-        torch.cuda.empty_cache()
-        sloss = sum([contextual_loss(fake_feat[1][i], ref_feat[i]) for i in range(len(ref_feat))])
-        torch.cuda.empty_cache()
+        closs = [contextual_loss(fake_feat[0][i], src_feat[i]) for i in range(len(src_feat))]
+        sloss = [contextual_loss(fake_feat[1][i], ref_feat[i]) for i in range(len(ref_feat))]
 
-        loss = config.lambda_content * closs + config.lambda_style * sloss
+        loss = config.lambda_content * sum(closs) + config.lambda_style * sum(sloss)
 
         opts['G'].zero_grad()
         loss.backward()
@@ -138,7 +136,7 @@ def get_contextual_loss(config):
             f1 = f1.contiguous().view(B, C, H*W, 1).repeat(1,1,1,H*W)
             dists = []
             for f2 in feat2:
-                f2 = f2.contiguous().view(B, C, H*W, 1).repeat(1,1,1,H*W).detach()
+                f2 = f2.contiguous().view(B, C, 1, H*W).repeat(1,1,H*W,1)
 
                 if config.distance == 'l2':
                     dist = (f1 - f2).pow(2).sum(dim=1)
@@ -156,7 +154,15 @@ def get_contextual_loss(config):
         return -torch.log(cx.squeeze(1).mean(dim=1)).mean()
     return contextual_loss
 
+if __name__ == '__main__':
+    from dotteddict import dotteddict
+    config ={'feat_sep':32, 'distance':'l2', 'h':0.5}
+    contextual_loss = get_contextual_loss(dotteddict(config))
 
+    f1 = torch.randn(1,16,32,32)
+    f2 = torch.randn(1,16,32,32)
+
+    print(contextual_loss(f1,f2))
 
 
 
