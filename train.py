@@ -121,11 +121,11 @@ def get_contextual_loss(config):
         feat1 = merge_list([f.split(sep, dim=3) for f in feat1.split(sep, dim=2)])
         feat2 = merge_list([f.split(sep, dim=3) for f in feat2.split(sep, dim=2)])
         for f1 in feat1:
+            f1 = f1.contiguous().view(B, C, H*W, 1).repeat(1,1,1,H*W)
             dists.append([])
             for f2 in feat2:
-
-                f1 = f1.contiguous().view(B, C, H*W, 1).repeat(1,1,1,H*W)
-                f2 = f2.contiguous().view(B, C, H*W, 1).repeat(1,1,1,H*W)
+                print(f1.shape, f2.shape)
+                f2 = f2.contiguous().view(B, C, H*W, 1).repeat(1,1,1,H*W).detach()
 
                 if config.distance == 'l2':
                     dist = (f1 - f2).pow(2).sum(dim=1)
