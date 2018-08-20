@@ -104,6 +104,7 @@ def train(model, data, config):
 
 
 def get_contextual_loss(config):
+    sep = config.feat_sep
     def contextual_loss(feat1, feat2):
         B, C, H1, W1 = feat1.size()
         _, _, H2, W2 = feat2.size()
@@ -116,9 +117,9 @@ def get_contextual_loss(config):
             feat2 = random_crop(feat2, (2,3), (H,W))        
 
         dists = []
-        H, W = min(32,H), min(32,W)
-        feat1 = merge_list([f.split(32, dim=3) for f in feat1.split(32, dim=2)])
-        feat2 = merge_list([f.split(32, dim=3) for f in feat2.split(32, dim=2)])
+        H, W = min(sep,H), min(sep,W)
+        feat1 = merge_list([f.split(sep, dim=3) for f in feat1.split(sep, dim=2)])
+        feat2 = merge_list([f.split(sep, dim=3) for f in feat2.split(sep, dim=2)])
         for f1 in feat1:
             dists.append([])
             for f2 in feat2:

@@ -40,7 +40,7 @@ def get_parameter():
     parser.add_argument('--beta', type=float, default=0.5)
     parser.add_argument('--batch_size', type=int, default=1)
     parser.add_argument('--pretrained_model', type=int, default=-1)
-    #parser.add_argument('--gpu_num', type=int, default=2)
+    parser.add_argument('--feat_sep', type=int, default=16)
 
     parser.add_argument('--lambda_content', type=float, default=1)
     parser.add_argument('--lambda_style', type=float, default=1)
