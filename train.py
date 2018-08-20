@@ -34,6 +34,19 @@ def train(model, data, config):
     log = {}
     log['nsteps'] = config.num_steps
 
+    # pretrain
+    for i in range(config.pretrain_num_steps):
+        (src_pho, ref_pho), data_iter = get_data(data_iter, data_loader)
+        src_pho, ref_pho = src_pho.to(config.device), ref_pho.to(config.device)
+        fake_pho = model['G'](src_pho, ref_pho)
+        rec_loss = 10*(fake_pho - src_pho).abs().mean() + (fake_pho - ref_pho).abs().mean()
+        opts['G'].zero_grad()
+        rec_loss.backward()
+        opts['G'].step()
+        if (i+1) % (config.log_step) == 0:
+            print('pretrain: [{}/{}], rec_loss:{:.4f}'.format(i+1, config.pretrain_num_steps, rec_loss.item()))
+
+
     for i in range(config.num_steps):
         log['step'] = i+1
 

@@ -33,6 +33,7 @@ def get_parameter():
 
 
     # train
+    parser.add_argument('--pretrain_num_steps', type=int, default=1000)
     parser.add_argument('--num_steps', type=int, default=200000)
     parser.add_argument('--num_steps_decay', type=int, default=80000)
     parser.add_argument('--d_train_repeat', type=int, default=5)
