@@ -105,8 +105,10 @@ class DeepFeature(nn.Module):
         elem = layers[0]
         if isinstance(elem, str):
             target_layers = [self.layer2num[s] for s in layers]
+            target_layers.sort()
         elif isinstance(elem, str):
             target_layers = layers
+            target_layers.sort()
         elif isinstance(elem, list):
             target_layers = list(set(merge_list(layers)))
             target_layers.sort()
