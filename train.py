@@ -151,7 +151,7 @@ def get_contextual_loss(config):
             dist = torch.cat(dists, dim=2)
             dist = dist / (dist.min(dim=2,keepdim=True)[0]+1e-5)
             dist = torch.exp((1-dist)/config.h)
-            dist = dist / dist.sum(dim=2, keep_dim=True)
+            dist = dist / dist.sum(dim=2, keepdim=True)
             cx = torch.max(torch.cat([cx, dist], dim=1), dim=1, keepdim=True)[0]
         return -torch.log(cx.squeeze(1).mean(dim=1)).mean()
     return contextual_loss
