@@ -63,7 +63,8 @@ def train(model, data, config):
             ref_feat = ext_net(denorm(ref_pho), config.style_layers, detach=True)
         fake_feat = ext_net(denorm(fake_pho), [config.content_layers,config.style_layers], detach=False)
 
-        closs = [contextual_loss(fake_feat[0][i], src_feat[i]) for i in range(len(src_feat))]
+        #closs = [contextual_loss(fake_feat[0][i], src_feat[i]) for i in range(len(src_feat))]
+        closs = [(fake_feat[0][i]-src_feat[i]).abs().mean() for i in range(len(src_feat))]
         sloss = [contextual_loss(fake_feat[1][i], ref_feat[i]) for i in range(len(ref_feat))]
         closs, sloss = sum(closs), sum(sloss)
 
